@@ -1,19 +1,29 @@
 <script lang="ts">
+	import MuteButton from './muteButton.svelte';
+
 	import { dev } from '$app/environment';
 	import { Youtube } from '$lib/scripts/youtube_client_api';
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
 
 	let { src, desc, title, play, watchlist, trending_type, query } = $props();
 
 	let engage_text = $state();
 	let video_id = $state(undefined);
+	let muted = $state(true);
 	let image_height = $state(0);
 	let prev_height = 0;
 	let height_poll: number;
 	let player_poll: number;
 
-	function unmute() {
-		player.unMute();
+	function toggle_mute() {
+		if (player.isMuted()) {
+			muted = false;
+			player.unMute();
+		} else {
+			muted = true;
+			player.mute();
+		}
 	}
 
 	function handle_resize() {
@@ -34,8 +44,7 @@
 			playerVars: {
 				autoplay: 1,
 				controls: 0,
-				muted: 1,
-				playsinline: 1
+				muted: 1
 			},
 			events: {
 				onReady: () => {
@@ -87,7 +96,7 @@
 </script>
 
 <div>
-	<img bind:clientHeight={image_height} {src} alt={title} class="-z-50" />
+	<img transition:fade bind:clientHeight={image_height} {src} alt={title} class="-z-50" />
 	<div class={`pointer-events-none absolute top-0 left-0 w-full`} id="player"></div>
 	<div class="relative">
 		<div class="absolute bottom-0 z-50 flex flex-col gap-3 pb-10 pl-10">
@@ -96,7 +105,10 @@
 			<p class="max-w-10/12">{desc}</p>
 			<div class="flex flex-row gap-3">
 				<button class="btn btn-primary"> Play </button>
-				<button class="btn btn-primary" onclick={unmute}> Wathlist </button>
+				<button class="btn btn-primary"> Wathlist </button>
+				{#if video_id}
+					<MuteButton {muted} {toggle_mute} />
+				{/if}
 			</div>
 		</div>
 		<div id="hero_darken" class="absolute -top-96 h-96 w-full"></div>
