@@ -1,0 +1,107 @@
+<script lang="ts">
+	import { dev } from '$app/environment';
+	import { onMount } from 'svelte';
+
+	let { src, desc, title, play, watchlist, trending_type, embed } = $props();
+
+	let engage_text = $state();
+	if (trending_type == 'day') {
+		engage_text = '#1 Trending Today';
+	} else {
+		engage_text = '#1 Trending Weekly';
+	}
+
+	let image_height = $state(0);
+	let prev_height = 0;
+	let height_poll: number;
+	let player_poll: number;
+
+	function unmute() {
+		player.unMute();
+	}
+
+	function handle_resize() {
+		height_poll = setInterval(() => {
+			if (image_height !== prev_height) {
+				prev_height = image_height;
+				if (player.g) player.g.style.height = `${image_height}px`;
+			}
+		}, 500);
+	}
+
+	let player: any;
+	function onYouTubeIframeAPIReady() {
+		player = new (window as any).YT.Player('player', {
+			height: image_height,
+			videoId: embed,
+			autoplay: true,
+			playerVars: {
+				autoplay: 1,
+				controls: 0,
+				muted: 1,
+				playsinline: 1
+			},
+			events: {
+				onReady: () => {
+					player.mute();
+					player.setVolume(10);
+
+					player_poll = setInterval(() => {
+						if (player.getCurrentTime() == player.getDuration()) {
+							clearInterval(player_poll);
+							clearInterval(height_poll);
+							player.g.style.display = 'none';
+						}
+					}, 100);
+				},
+				onStateChange: undefined
+			}
+		});
+
+		if (dev) window.player = player;
+	}
+
+	onMount(() => {
+		if (embed) {
+			const tag = document.createElement('script');
+			tag.src = 'https://www.youtube.com/iframe_api';
+
+			document.body.prepend(tag);
+			setTimeout(() => {
+				onYouTubeIframeAPIReady();
+				clearInterval(height_poll);
+				handle_resize();
+			}, 1000);
+		}
+	});
+</script>
+
+<div>
+	<img bind:clientHeight={image_height} {src} alt={title} class="-z-50" />
+	<div class={`pointer-events-none absolute top-0 left-0 w-full`} id="player"></div>
+	<div class="relative">
+		<div class="absolute bottom-0 z-50 flex flex-col gap-3 pb-10 pl-10">
+			<span class="-mb-3 font-black">{engage_text}</span>
+			<h1 class="text-3xl font-bold">{title}</h1>
+			<p class="max-w-10/12">{desc}</p>
+			<div class="flex flex-row gap-3">
+				<button class="btn btn-primary"> Play </button>
+				<button class="btn btn-primary" onclick={unmute}> Wathlist </button>
+			</div>
+		</div>
+		<div id="hero_darken" class="absolute -top-96 h-96 w-full"></div>
+	</div>
+</div>
+
+<style>
+	#hero_darken {
+		background: #000000;
+		background: linear-gradient(
+			0deg,
+			rgba(0, 0, 0, 0.85) 14%,
+			rgba(0, 0, 0, 0.87) 44%,
+			rgba(0, 0, 0, 0.82) 67%,
+			rgba(255, 255, 255, 0) 100%
+		);
+	}
+</style>
