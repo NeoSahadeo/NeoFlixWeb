@@ -1,16 +1,12 @@
 <script lang="ts">
 	import { dev } from '$app/environment';
+	import { Youtube } from '$lib/scripts/youtube_client_api';
 	import { onMount } from 'svelte';
 
-	let { src, desc, title, play, watchlist, trending_type, embed } = $props();
+	let { src, desc, title, play, watchlist, trending_type, query } = $props();
 
 	let engage_text = $state();
-	if (trending_type == 'day') {
-		engage_text = '#1 Trending Today';
-	} else {
-		engage_text = '#1 Trending Weekly';
-	}
-
+	let video_id = $state(undefined);
 	let image_height = $state(0);
 	let prev_height = 0;
 	let height_poll: number;
@@ -33,7 +29,7 @@
 	function onYouTubeIframeAPIReady() {
 		player = new (window as any).YT.Player('player', {
 			height: image_height,
-			videoId: embed,
+			videoId: video_id,
 			autoplay: true,
 			playerVars: {
 				autoplay: 1,
@@ -47,7 +43,7 @@
 					player.setVolume(10);
 
 					player_poll = setInterval(() => {
-						if (player.getCurrentTime() == player.getDuration()) {
+						if (player.getCurrentTime() > player.getDuration() - 1) {
 							clearInterval(player_poll);
 							clearInterval(height_poll);
 							player.g.style.display = 'none';
@@ -61,8 +57,16 @@
 		if (dev) window.player = player;
 	}
 
-	onMount(() => {
-		if (embed) {
+	if (trending_type == 'day') {
+		engage_text = '#1 Trending Today';
+	} else {
+		engage_text = '#1 Trending Weekly';
+	}
+
+	onMount(async () => {
+		const youtube_client_api = new Youtube();
+		video_id = (await youtube_client_api.load_trailer(query)) as any;
+		if (video_id) {
 			const tag = document.createElement('script');
 			tag.src = 'https://www.youtube.com/iframe_api';
 
@@ -74,6 +78,12 @@
 			}, 1000);
 		}
 	});
+
+	if (trending_type == 'day') {
+		engage_text = '#1 Trending Today';
+	} else {
+		engage_text = '#1 Trending Weekly';
+	}
 </script>
 
 <div>
