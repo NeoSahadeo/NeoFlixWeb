@@ -52,6 +52,10 @@
 					player.setVolume(10);
 
 					player_poll = setInterval(() => {
+						if (player.getPlayerState() == -1) {
+							player.g.style.display = 'none';
+						}
+
 						if (player.getCurrentTime() > player.getDuration() - 1) {
 							clearInterval(player_poll);
 							clearInterval(height_poll);

@@ -9,8 +9,9 @@
 	const links: Record<string, string> = {
 		Home: base_path + 'u/home',
 		'TV Shows': base_path + 'u/tvshows',
-		Movies: 'u/movies',
-		Watchlist: 'u/watchlist'
+		Movies: base_path + 'u/movies',
+		// Watchlist: 'u/watchlist',
+		Downloaded: base_path + 'u/downloaded'
 	};
 </script>
 

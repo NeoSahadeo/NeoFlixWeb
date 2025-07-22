@@ -21,7 +21,7 @@ async function fetch_trending(selector: 'all' | 'movie' | 'tv', time_window: 'da
 	} catch (err) {
 		console.error(err);
 	}
-	return undefined;
+	return null;
 }
 
 export { fetch_trending };
