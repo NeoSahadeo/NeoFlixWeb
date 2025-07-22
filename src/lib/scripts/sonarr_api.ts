@@ -4,7 +4,7 @@ function sonar_error(data: any) {
 	console.error('[Sonarr] Error:', data);
 }
 
-async function fetch_tmdb_ref(id: string, api_key: string) {
+async function fetch_tmdb_ref(id: string, api_key: string): Promise<JSON | null> {
 	try {
 		const response = await fetch(url_resolver('sonarr') + 'series/lookup?term=tmdb:' + id, {
 			headers: {
@@ -19,6 +19,7 @@ async function fetch_tmdb_ref(id: string, api_key: string) {
 	} catch (err) {
 		sonar_error(err);
 	}
+	return null;
 }
 
 async function fetch_series(api_key: string) {

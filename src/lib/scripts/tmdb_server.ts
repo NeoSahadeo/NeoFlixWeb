@@ -9,6 +9,10 @@ const options = {
 	}
 };
 
+function tmdb_error(err: any) {
+	console.error('[TMDB] Error:', err);
+}
+
 async function fetch_trending(
 	selector: 'all' | 'movie' | 'tv',
 	time_window: 'day' | 'week',
@@ -26,9 +30,24 @@ async function fetch_trending(
 			return await response.json();
 		}
 	} catch (err) {
-		console.error(err);
+		tmdb_error(err);
 	}
 	return null;
 }
 
-export { fetch_trending };
+async function fetch_data(id: any): Promise<JSON | null> {
+	try {
+		const response = await fetch(TMDB_API + 'tv/' + id, {
+			method: 'GET',
+			...options
+		});
+		if (response.ok) {
+			return await response.json();
+		}
+	} catch (err) {
+		tmdb_error(err);
+	}
+	return null;
+}
+
+export { fetch_trending, fetch_data };
