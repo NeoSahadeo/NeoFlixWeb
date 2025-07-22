@@ -50,4 +50,28 @@ async function fetch_data(id: any): Promise<JSON | null> {
 	return null;
 }
 
-export { fetch_trending, fetch_data };
+async function search(query: string, page: number = 1): Promise<{ tv: JSON; movie: JSON } | null> {
+	try {
+		const tv_response = await fetch(TMDB_API + 'search/tv?query=' + query + '&page=' + page, {
+			method: 'GET',
+			...options
+		});
+		const movie_response = await fetch(TMDB_API + 'search/movie?query=' + query + '&page=' + page, {
+			method: 'GET',
+			...options
+		});
+		if (tv_response.ok && movie_response.ok) {
+			const tv_json = await tv_response.json();
+			const movie_json = await movie_response.json();
+			return {
+				tv: tv_json,
+				movie: movie_json
+			};
+		}
+	} catch (err) {
+		tmdb_error(err);
+	}
+	return null;
+}
+
+export { fetch_trending, fetch_data, search };

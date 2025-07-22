@@ -1,6 +1,7 @@
 <script lang="ts">
 	import IconLogo from '$lib/icons/iconLogo.svelte';
 	import Link from './link.svelte';
+	import Search from '../search/search.svelte';
 
 	import { url_resolver } from '$lib/scripts/url_utils';
 
@@ -16,9 +17,7 @@
 </script>
 
 <nav class="fixed flex min-h-10 w-full flex-row items-center gap-3 px-5 py-5">
-	<span class="mr-9">
-		<IconLogo />
-	</span>
+	<Search />
 	<ul class="flex flex-row items-center gap-7">
 		{#each Object.keys(links) as link}
 			<Link label={link} href={links[link]} />

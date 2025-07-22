@@ -5,6 +5,6 @@
 
 <img
 	{alt}
-	src={resolve_image(src, 'original')}
+	src={resolve_image(src, 'small')}
 	class="max-w-40 rounded sm:max-w-50 md:max-w-72 lg:max-w-80"
 />
