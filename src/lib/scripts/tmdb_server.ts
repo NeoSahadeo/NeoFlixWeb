@@ -9,12 +9,19 @@ const options = {
 	}
 };
 
-async function fetch_trending(selector: 'all' | 'movie' | 'tv', time_window: 'day' | 'week') {
+async function fetch_trending(
+	selector: 'all' | 'movie' | 'tv',
+	time_window: 'day' | 'week',
+	page: number = 1
+) {
 	try {
-		const response = await fetch(TMDB_API + 'trending/' + selector + '/' + time_window, {
-			method: 'GET',
-			...options
-		});
+		const response = await fetch(
+			TMDB_API + 'trending/' + selector + '/' + time_window + `?page=${page}`,
+			{
+				method: 'GET',
+				...options
+			}
+		);
 		if (response.ok) {
 			return await response.json();
 		}

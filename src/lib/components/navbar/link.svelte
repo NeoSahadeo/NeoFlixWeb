@@ -3,5 +3,5 @@
 </script>
 
 <li>
-	<a {href} class="link link-primary text-sm font-bold no-underline">{label}</a>
+	<a {href} class="link link-primary text-sm font-bold whitespace-nowrap no-underline">{label}</a>
 </li>
