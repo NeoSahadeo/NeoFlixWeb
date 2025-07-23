@@ -10,6 +10,30 @@ const GET_OPTIONS = (api_key: string) => {
 	};
 };
 
+const PUT_OPTIONS = (json: any, api_key: string) => {
+	return {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			accept: 'application/json',
+			'X-Api-Key': api_key
+		},
+		body: JSON.stringify(json)
+	};
+};
+
+const POST_OPTIONS = (json: any, api_key: string) => {
+	return {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			accept: 'application/json',
+			'X-Api-Key': api_key
+		},
+		body: JSON.stringify(json)
+	};
+};
+
 const ADD_OPTIONS = () => {
 	return {
 		searchForMissingEpisodes: true,
@@ -109,15 +133,7 @@ async function request_all_episodes(id: string, api_key: string) {
 			for (let x = 0; x < json['seasons'].length; x++) {
 				json['seasons'][x]['monitored'] = true;
 			}
-			const r = await fetch(url_resolver('sonarr') + 'series', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					accept: 'application/json',
-					'X-Api-Key': api_key
-				},
-				body: JSON.stringify(json)
-			});
+			const r = await fetch(url_resolver('sonarr') + 'series', POST_OPTIONS(json, api_key));
 			if (r.ok) {
 				refresh_metadata_handler.dispatch('refresh_tv_view');
 			}
@@ -136,15 +152,10 @@ async function request_missing_episodes(id: string, api_key: string) {
 				json['seasons'][x]['monitored'] = true;
 			}
 
-			const r = await fetch(url_resolver('sonarr') + 'series/' + json.id, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-					accept: 'application/json',
-					'X-Api-Key': api_key
-				},
-				body: JSON.stringify(json)
-			});
+			const r = await fetch(
+				url_resolver('sonarr') + 'series/' + json.id,
+				PUT_OPTIONS(json, api_key)
+			);
 			if (r.ok) {
 				refresh_metadata_handler.dispatch('refresh_tv_view');
 			}
@@ -155,7 +166,43 @@ async function request_missing_episodes(id: string, api_key: string) {
 	return null;
 }
 async function request_episode(id: string, season: number, api_key: string) { }
-async function request_season(id: string, season: number, api_key: string) { }
+
+async function request_season(id: string, season: number, api_key: string) {
+	try {
+		let json = (await fetch_sonarr_local(id, api_key)) as any;
+		if (!json) return null;
+
+		const does_exist = ((await fetch_series(json.tvdbId, api_key)) as any).length > 0;
+		if (does_exist) {
+			json['seasons'][season]['monitored'] = true;
+			const r = await fetch(
+				url_resolver('sonarr') + 'series/' + json.id,
+				PUT_OPTIONS(json, api_key)
+			);
+			if (r.ok) {
+				refresh_metadata_handler.dispatch('refresh_tv_view');
+			}
+		} else {
+			const media_folder = await get_media_folder(api_key);
+			if (media_folder) {
+				json['rootFolderPath'] = media_folder;
+				json['addOptions'] = ADD_OPTIONS();
+				json['qualityProfileId'] = 1;
+				for (let x = 0; x < json['seasons'].length; x++) {
+					json['seasons'][x]['monitored'] = false;
+				}
+				json['seasons'][season]['monitored'] = true;
+				const r = await fetch(url_resolver('sonarr') + 'series', POST_OPTIONS(json, api_key));
+				if (r.ok) {
+					refresh_metadata_handler.dispatch('refresh_tv_view');
+				}
+			}
+		}
+	} catch (err) {
+		sonar_error(err);
+	}
+	return null;
+}
 
 async function delete_all_episodes(id: string, api_key: string) {
 	try {
