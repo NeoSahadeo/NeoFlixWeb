@@ -116,6 +116,39 @@ async function request_all_episodes(id: string, api_key: string) {
 	}
 	return null;
 }
+
+async function request_missing_episodes(id: string, api_key: string) {
+	try {
+		const response = await fetch(
+			url_resolver('sonarr') + 'series/lookup?term=tvdb:' + id,
+			GET_OPTIONS(api_key)
+		);
+		if (response.ok) {
+			let json = await response.json();
+			if (json.length == 0) return null;
+			json = json[0];
+			for (let x = 0; x < json['seasons'].length; x++) {
+				json['seasons'][x]['monitored'] = true;
+			}
+
+			const r = await fetch(url_resolver('sonarr') + 'series/' + json.id, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					accept: 'application/json',
+					'X-Api-Key': api_key
+				},
+				body: JSON.stringify(json)
+			});
+			if (r.ok) {
+				refresh_metadata_handler.dispatch('refresh_tv_view');
+			}
+		}
+	} catch (err) {
+		sonar_error(err);
+	}
+	return null;
+}
 async function request_episode(id: string, season: number, api_key: string) { }
 async function request_season(id: string, season: number, api_key: string) { }
 
@@ -128,6 +161,7 @@ export {
 	fetch_all_series,
 	fetch_series,
 	request_all_episodes,
+	request_missing_episodes,
 	request_episode,
 	request_season,
 	delete_all_episodes,

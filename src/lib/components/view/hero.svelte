@@ -36,7 +36,7 @@
 					{#if tracked_seasons !== total_seasons}
 						<Request
 							type="tv"
-							season={'all'}
+							season={tracked_seasons === 0 || tracked_seasons === undefined ? 'all' : 'missing'}
 							id={data.sonarr_database.tvdbId}
 							label={`Request ${tracked_seasons === 0 || tracked_seasons === undefined ? 'All' : 'Missing'} Seasons`}
 						/>
