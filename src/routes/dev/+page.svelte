@@ -29,7 +29,10 @@
 	<button
 		class="btn btn-primary"
 		onclick={async () => {
-			const x = await fetch_tmdb_ref(tmdb_sonarr, storage_controller.get('sonarr_api_key')!);
+			const x = (await fetch_tmdb_ref(
+				tmdb_sonarr,
+				storage_controller.get('sonarr_api_key')!
+			)) as any;
 			console.log(x);
 			sonarr_json = x;
 			image_src!.src = x!.remotePoster;

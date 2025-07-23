@@ -1,49 +1,12 @@
 import { refresh_metadata_handler } from '$lib/events/default';
 import { url_resolver } from './url_utils';
-
-const GET_OPTIONS = (api_key: string) => {
-	return {
-		headers: {
-			'X-Api-Key': api_key
-		},
-		method: 'GET'
-	};
-};
-
-const PUT_OPTIONS = (json: any, api_key: string) => {
-	return {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-			accept: 'application/json',
-			'X-Api-Key': api_key
-		},
-		body: JSON.stringify(json)
-	};
-};
-
-const POST_OPTIONS = (json: any, api_key: string) => {
-	return {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			accept: 'application/json',
-			'X-Api-Key': api_key
-		},
-		body: JSON.stringify(json)
-	};
-};
-
-const DELETE_OPTIONS = (api_key: string) => {
-	return {
-		method: 'DELETE',
-		headers: {
-			'Content-Type': 'application/json',
-			accept: 'application/json',
-			'X-Api-Key': api_key
-		}
-	};
-};
+import {
+	DELETE_OPTIONS,
+	GET_OPTIONS,
+	PUT_OPTIONS,
+	POST_OPTIONS,
+	get_media_folder
+} from './shared_api';
 
 const ADD_OPTIONS = () => {
 	return {
@@ -54,17 +17,6 @@ const ADD_OPTIONS = () => {
 
 function sonar_error(data: any) {
 	console.error('[Sonarr] Error:', data);
-}
-
-async function get_media_folder(api_key: string) {
-	try {
-		const response = await fetch(url_resolver('sonarr') + 'rootfolder', GET_OPTIONS(api_key));
-		if (response.ok) {
-			return (await response.json())[0].path;
-		}
-	} catch (err) {
-		sonar_error(err);
-	}
 }
 
 async function fetch_sonarr_local(id: string, api_key: string): Promise<JSON | null> {
@@ -136,7 +88,7 @@ async function fetch_all_series(api_key: string) {
 async function request_all_episodes(id: string, api_key: string) {
 	try {
 		let json = (await fetch_sonarr_local(id, api_key)) as any;
-		const media_folder = await get_media_folder(api_key);
+		const media_folder = await get_media_folder('sonarr', api_key);
 		if (json && media_folder) {
 			json['rootFolderPath'] = media_folder;
 			json['addOptions'] = ADD_OPTIONS();
@@ -196,7 +148,7 @@ async function request_season(id: string, season: number, api_key: string) {
 				refresh_metadata_handler.dispatch('refresh_tv_view');
 			}
 		} else {
-			const media_folder = await get_media_folder(api_key);
+			const media_folder = await get_media_folder('sonarr', api_key);
 			if (media_folder) {
 				json['rootFolderPath'] = media_folder;
 				json['addOptions'] = ADD_OPTIONS();
