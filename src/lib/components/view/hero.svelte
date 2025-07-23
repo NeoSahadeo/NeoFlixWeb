@@ -2,17 +2,19 @@
 	import DeleteId from '../buttons/deleteId.svelte';
 	import Request from '../buttons/request.svelte';
 	import Poster from './poster.svelte';
+
 	let { data } = $props();
 
-	let monitored = $state(0);
+	let total_seasons = $derived(data.sonarr_database.seasons.length);
+	let tracked_seasons = $derived(
+		data.sonarr_local?.seasons.reduce(
+			(accumulator: any, current_value: any) => accumulator + (current_value.monitored ? 1 : 0),
+			0
+		)
+	);
 
-	data.sonarr_data.seasons.forEach((e: any) => {
-		if (e.monitored) {
-			monitored++;
-		}
-	});
-
-	$inspect(data.sonarr_data.tvdbId);
+	$inspect(data.sonarr_database.tvdbId);
+	$inspect(tracked_seasons);
 </script>
 
 <div class="flex flex-row">
@@ -31,19 +33,19 @@
 		<span class="mt-4 block">
 			{#if data.type === 'tv'}
 				<div class="flex max-w-fit flex-col gap-3">
-					{#if monitored != data.sonarr_data.seasons.length}
+					{#if tracked_seasons !== total_seasons}
 						<Request
 							type="tv"
 							season={'all'}
-							id={data.sonarr_data.tvdbId}
-							label={`Request ${monitored > 0 && data.sonarr_array_length > 0 ? 'Missing' : 'All'} Seasons`}
+							id={data.sonarr_database.tvdbId}
+							label={`Request ${tracked_seasons === 0 || tracked_seasons === undefined ? 'All' : 'Missing'} Seasons`}
 						/>
 					{/if}
-					{#if monitored > 0 && data.sonarr_array_length > 0}
+					{#if tracked_seasons > 0}
 						<DeleteId
 							type="tv"
 							season={'all'}
-							id={data.sonarr_data.tvdbId}
+							id={data.sonarr_database.tvdbId}
 							label={'Delete All Downloaded Seasons'}
 						/>
 					{/if}

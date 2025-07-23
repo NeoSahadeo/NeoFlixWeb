@@ -11,13 +11,13 @@
 
 	let { data }: any = $props();
 	let storage_controller = new LocalStorageController();
-	let tmdb_data = $state<any>();
-	let sonarr_data = $state<any>();
-	let sonarr_array = $state<any[]>([]);
+	let tmdb_data = $state<any>(); // maybe reduce scope if not needed?
+	let sonarr_database = $state<any>();
+	let sonarr_local = $state<any>();
 	let full_data = $derived({
 		type: 'tv',
-		sonarr_data: sonarr_data,
-		sonarr_array_length: sonarr_array.length,
+		sonarr_database: sonarr_database, // default sonarr stats from tvdb etc
+		sonarr_local: sonarr_local, // actual data for the show on sonarr server
 		tmdb_data: tmdb_data
 	});
 	let error = $state(false);
@@ -29,14 +29,15 @@
 		)) as any;
 		if (response) {
 			try {
-				sonarr_array = await fetch_series(
+				const sonarr_array = await fetch_series(
 					response.tvdbId,
 					storage_controller.get('sonarr_api_key')!
 				);
 				if (sonarr_array.length > 0) {
-					sonarr_data = sonarr_array[0];
+					sonarr_database = sonarr_array[0];
+					sonarr_local = sonarr_array[0];
 				} else {
-					sonarr_data = response;
+					sonarr_database = response;
 				}
 
 				const r = await fetch(url_resolver('self') + 'api/tmdb/data?id=' + response.tmdbId);
@@ -57,7 +58,8 @@
 	});
 
 	$inspect(tmdb_data);
-	$inspect(sonarr_data);
+	$inspect(sonarr_database);
+	$inspect(sonarr_local);
 </script>
 
 <main class="px-4 pt-20 pb-20">
@@ -71,16 +73,16 @@
 					<div class="flex flex-col gap-2">
 						<span class="flex flex-col gap-2 rounded px-1 py-1 outline-1 outline-neutral-800">
 							<SeasonPoster src={season.poster_path} label={season.name} />
-							{#if sonarr_data.seasons[index].monitored && sonarr_array.length > 0}
+							{#if sonarr_local?.seasons[index].monitored}
 								<DeleteId
 									type="tv"
-									id={sonarr_data.tvdbId}
+									id={sonarr_database.tvdbId}
 									season={index}
 									label={'Delete S' + season.season_number}
 								/>
 							{:else}
 								<Request
-									id={sonarr_data.tvdbId}
+									id={sonarr_database.tvdbId}
 									type="tv"
 									season={index}
 									label={'Request S' + season.season_number}
