@@ -34,6 +34,17 @@ const POST_OPTIONS = (json: any, api_key: string) => {
 	};
 };
 
+const DELETE_OPTIONS = (api_key: string) => {
+	return {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json',
+			accept: 'application/json',
+			'X-Api-Key': api_key
+		}
+	};
+};
+
 const ADD_OPTIONS = () => {
 	return {
 		searchForMissingEpisodes: true,
@@ -213,14 +224,7 @@ async function delete_all_episodes(id: string, api_key: string) {
 				'series/' +
 				json.id +
 				'?deleteFiles=true&addImportListExclusion=false',
-				{
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json',
-						accept: 'application/json',
-						'X-Api-Key': api_key
-					}
-				}
+				DELETE_OPTIONS(api_key)
 			);
 			if (r.ok) {
 				setTimeout(() => {
@@ -234,7 +238,29 @@ async function delete_all_episodes(id: string, api_key: string) {
 	return null;
 }
 async function delete_episode(id: string, season: number, api_key: string) { }
-async function delete_season(id: string, season: number, api_key: string) { }
+async function delete_season(id: string, season: number, api_key: string) {
+	try {
+		let json = (await fetch_sonarr_local(id, api_key)) as any;
+		if (json) {
+			json['seasons'][season]['monitored'] = false;
+			const r = await fetch(
+				url_resolver('sonarr') + 'series/' + json.id,
+				PUT_OPTIONS(json, api_key)
+			);
+			if (r.ok) {
+				const current_data = await fetch_series(json.tvdbId, api_key);
+				if (current_data.length > 0) {
+					current_data[0].seasons.filter((e: any) => e.monitored).length == 0;
+					await delete_all_episodes(id, api_key);
+				}
+				refresh_metadata_handler.dispatch('refresh_tv_view');
+			}
+		}
+	} catch (err) {
+		sonar_error(err);
+	}
+	return null;
+}
 
 export {
 	fetch_tmdb_ref, //
