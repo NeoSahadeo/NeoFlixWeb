@@ -1,10 +1,10 @@
 <script lang="ts">
-	import IconPlus from '$lib/icons/iconPlus.svelte';
+	import IconTrashcan from '$lib/icons/iconTrashcan.svelte';
 	let {
 		id,
 		type,
 		season,
-		label = 'Request',
+		label = 'Delete',
 		_class = ''
 	}: {
 		type: 'tv' | 'movie';
@@ -15,7 +15,7 @@
 	} = $props();
 </script>
 
-<button class={'btn btn-primary ' + _class}>
-	<IconPlus size={20} />
+<button class={'btn btn-error ' + _class}>
+	<IconTrashcan size={20} />
 	{label}</button
 >

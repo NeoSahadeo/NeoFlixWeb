@@ -3,4 +3,8 @@
 	let { src, label } = $props();
 </script>
 
-<img alt={label} src={resolve_image(src, 'small')} class="max-w-40 rounded" />
+<img
+	alt={label}
+	src={resolve_image(src, 'small')}
+	class={`max-h-60 min-h-60 max-w-40 min-w-40 rounded`}
+/>

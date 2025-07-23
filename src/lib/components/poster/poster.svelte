@@ -2,10 +2,11 @@
 	import { url_resolver } from '$lib/scripts/url_utils';
 	import { resolve_image } from '$lib/scripts/tmdb_client';
 
-	let { alt, src, id } = $props();
+	let { alt, src, id, type }: { alt: string; src: string; id: number; type: 'tv' | 'movie' } =
+		$props();
 
 	function open_link() {
-		window.location.assign(url_resolver('self') + 'u/view/' + id);
+		window.location.assign(url_resolver('self') + 'u/view/' + (type === 'tv' ? 't/' : 'm/') + id);
 	}
 </script>
 

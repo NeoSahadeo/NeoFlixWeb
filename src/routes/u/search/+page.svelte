@@ -44,7 +44,7 @@
 	<div class="flex flex-wrap gap-3">
 		{#each tvshows as result}
 			{#if result.poster_path}
-				<Poster alt={result.name} src={result.poster_path} id={result.id} />
+				<Poster alt={result.name} src={result.poster_path} id={result.id} type="tv" />
 			{/if}
 		{/each}
 	</div>
@@ -55,7 +55,7 @@
 	<div class="flex flex-wrap gap-3">
 		{#each movies as result}
 			{#if result.poster_path}
-				<Poster alt={result.name} src={result.poster_path} id={result.id} />
+				<Poster alt={result.name} src={result.poster_path} id={result.id} type="movie" />
 			{/if}
 		{/each}
 	</div>
