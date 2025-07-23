@@ -146,6 +146,7 @@ async function request_all_episodes(id: string, api_key: string) {
 			}
 			const r = await fetch(url_resolver('sonarr') + 'series', POST_OPTIONS(json, api_key));
 			if (r.ok) {
+				await start_search(json.id, api_key);
 				refresh_metadata_handler.dispatch('refresh_tv_view');
 			}
 		}
@@ -168,6 +169,7 @@ async function request_missing_episodes(id: string, api_key: string) {
 				PUT_OPTIONS(json, api_key)
 			);
 			if (r.ok) {
+				await start_search(json.id, api_key);
 				refresh_metadata_handler.dispatch('refresh_tv_view');
 			}
 		}
@@ -205,6 +207,7 @@ async function request_season(id: string, season: number, api_key: string) {
 				json['seasons'][season]['monitored'] = true;
 				const r = await fetch(url_resolver('sonarr') + 'series', POST_OPTIONS(json, api_key));
 				if (r.ok) {
+					await start_search(json.id, api_key);
 					refresh_metadata_handler.dispatch('refresh_tv_view');
 				}
 			}
@@ -255,6 +258,21 @@ async function delete_season(id: string, season: number, api_key: string) {
 				}
 				refresh_metadata_handler.dispatch('refresh_tv_view');
 			}
+		}
+	} catch (err) {
+		sonar_error(err);
+	}
+	return null;
+}
+
+async function start_search(id: number, api_key: string) {
+	try {
+		const response = await fetch(
+			url_resolver('sonarr') + 'command/',
+			POST_OPTIONS({ name: 'SeriesSearch', seriesId: id }, api_key)
+		);
+		if (response.ok) {
+			// notify?
 		}
 	} catch (err) {
 		sonar_error(err);

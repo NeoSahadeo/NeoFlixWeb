@@ -13,7 +13,7 @@
 	$inspect((data as any).trending.results);
 </script>
 
-<main class="flex flex-wrap gap-3 px-4 pt-16 pb-10">
+<main class="flex flex-wrap gap-3 px-4 pt-20 pb-10">
 	{#each (data as any).trending.results as result}
 		<Poster type="tv" alt={result.name} src={result.poster_path} id={result.id} />
 	{/each}

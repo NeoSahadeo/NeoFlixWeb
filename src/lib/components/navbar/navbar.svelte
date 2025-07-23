@@ -13,6 +13,7 @@
 		Movies: base_path + 'u/movies',
 		// Watchlist: 'u/watchlist',
 		Downloaded: base_path + 'u/downloaded'
+		// Dashboard: base_path + 'u/dashboard'
 	};
 </script>
 
