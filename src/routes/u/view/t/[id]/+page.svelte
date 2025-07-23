@@ -23,6 +23,7 @@
 	let error = $state(false);
 
 	async function load() {
+		sonarr_local = null;
 		const response = (await fetch_tmdb_ref(
 			(data.data as any).id,
 			storage_controller.get('sonarr_api_key')!

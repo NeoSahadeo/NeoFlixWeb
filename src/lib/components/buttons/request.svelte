@@ -5,7 +5,6 @@
 
 	let {
 		id,
-		local_id,
 		type,
 		season,
 		label = 'Request',
