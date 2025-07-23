@@ -1,20 +1,50 @@
+import { refresh_metadata_handler } from '$lib/events/default';
 import { url_resolver } from './url_utils';
+
+const GET_OPTIONS = (api_key: string) => {
+	return {
+		headers: {
+			'X-Api-Key': api_key
+		},
+		method: 'GET'
+	};
+};
+
+const ADD_OPTIONS = () => {
+	return {
+		searchForMissingEpisodes: true,
+		searchForCutoffUnmetEpisodes: true
+	};
+};
 
 function sonar_error(data: any) {
 	console.error('[Sonarr] Error:', data);
 }
 
+async function get_media_folder(api_key: string) {
+	try {
+		const response = await fetch(url_resolver('sonarr') + 'rootfolder', GET_OPTIONS(api_key));
+		if (response.ok) {
+			return (await response.json())[0].path;
+		}
+	} catch (err) {
+		sonar_error(err);
+	}
+}
+
 async function fetch_tmdb_ref(id: string, api_key: string): Promise<JSON | null> {
 	try {
-		const response = await fetch(url_resolver('sonarr') + 'series/lookup?term=tmdb:' + id, {
-			headers: {
-				'X-Api-Key': api_key
-			},
-			method: 'GET'
-		});
-
+		const response = await fetch(
+			url_resolver('sonarr') + 'series/lookup?term=tmdb:' + id,
+			GET_OPTIONS(api_key)
+		);
 		if (response.ok) {
-			return (await response.json())[0];
+			const json = await response.json();
+			if (json.length > 0) {
+				return json[0];
+			} else {
+				return null;
+			}
 		}
 	} catch (err) {
 		sonar_error(err);
@@ -24,12 +54,10 @@ async function fetch_tmdb_ref(id: string, api_key: string): Promise<JSON | null>
 
 async function fetch_series(id: string, api_key: string) {
 	try {
-		const response = await fetch(url_resolver('sonarr') + 'series?tvdbId=' + id, {
-			headers: {
-				'X-Api-Key': api_key
-			},
-			method: 'GET'
-		});
+		const response = await fetch(
+			url_resolver('sonarr') + 'series?tvdbId=' + id,
+			GET_OPTIONS(api_key)
+		);
 
 		if (response.ok) {
 			return await response.json();
@@ -37,16 +65,12 @@ async function fetch_series(id: string, api_key: string) {
 	} catch (err) {
 		sonar_error(err);
 	}
+	return null;
 }
 
 async function fetch_all_series(api_key: string) {
 	try {
-		const response = await fetch(url_resolver('sonarr') + 'series', {
-			headers: {
-				'X-Api-Key': api_key
-			},
-			method: 'GET'
-		});
+		const response = await fetch(url_resolver('sonarr') + 'series', GET_OPTIONS(api_key));
 
 		if (response.ok) {
 			return await response.json();
@@ -54,16 +78,59 @@ async function fetch_all_series(api_key: string) {
 	} catch (err) {
 		sonar_error(err);
 	}
+	return null;
 }
 
-async function request_all_episodes(id: string, api_key: string) { }
+async function request_all_episodes(id: string, api_key: string) {
+	try {
+		const response = await fetch(
+			url_resolver('sonarr') + 'series/lookup?term=tvdb:' + id,
+			GET_OPTIONS(api_key)
+		);
+		const media_folder = await get_media_folder(api_key);
+		if (response.ok && media_folder) {
+			let json = await response.json();
+			if (json.length == 0) return null;
+			json = json[0];
+			json['rootFolderPath'] = media_folder;
+			json['addOptions'] = ADD_OPTIONS();
+			json['qualityProfileId'] = 1;
+			for (let x = 0; x < json['seasons'].length; x++) {
+				json['seasons'][x]['monitored'] = true;
+			}
+			const r = await fetch(url_resolver('sonarr') + 'series', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					accept: 'application/json',
+					'X-Api-Key': api_key
+				},
+				body: JSON.stringify(json)
+			});
+			if (r.ok) {
+				refresh_metadata_handler.dispatch('refresh_tv_view');
+			}
+		}
+	} catch (err) {
+		sonar_error(err);
+	}
+	return null;
+}
 async function request_episode(id: string, season: number, api_key: string) { }
+async function request_season(id: string, season: number, api_key: string) { }
 
 async function delete_all_episodes(id: string, api_key: string) { }
 async function delete_episode(id: string, season: number, api_key: string) { }
+async function delete_season(id: string, season: number, api_key: string) { }
 
 export {
 	fetch_tmdb_ref, //
 	fetch_all_series,
-	fetch_series
+	fetch_series,
+	request_all_episodes,
+	request_episode,
+	request_season,
+	delete_all_episodes,
+	delete_episode,
+	delete_season
 };

@@ -11,6 +11,8 @@
 			monitored++;
 		}
 	});
+
+	$inspect(data.sonarr_data.tvdbId);
 </script>
 
 <div class="flex flex-row">
@@ -33,7 +35,7 @@
 						<Request
 							type="tv"
 							season={'all'}
-							id={data.sonarr_data.id}
+							id={data.sonarr_data.tvdbId}
 							label={`Request ${monitored > 0 && data.sonarr_array_length > 0 ? 'Missing' : 'All'} Seasons`}
 						/>
 					{/if}
@@ -41,7 +43,7 @@
 						<DeleteId
 							type="tv"
 							season={'all'}
-							id={data.sonarr_data.id}
+							id={data.sonarr_data.tvdbId}
 							label={'Delete All Downloaded Seasons'}
 						/>
 					{/if}

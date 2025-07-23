@@ -7,6 +7,7 @@
 	import { onMount } from 'svelte';
 	import { LocalStorageController } from '$lib/scripts/storage';
 	import { url_resolver } from '$lib/scripts/url_utils';
+	import { refresh_metadata_handler } from '$lib/events/default';
 
 	let { data }: any = $props();
 	let storage_controller = new LocalStorageController();
@@ -19,8 +20,9 @@
 		sonarr_array_length: sonarr_array.length,
 		tmdb_data: tmdb_data
 	});
+	let error = $state(false);
 
-	onMount(async () => {
+	async function load() {
 		const response = (await fetch_tmdb_ref(
 			(data.data as any).id,
 			storage_controller.get('sonarr_api_key')!
@@ -41,11 +43,17 @@
 				if (r.ok) {
 					tmdb_data = await r.json();
 				}
+				return;
 			} catch (err) {
 				console.error(err);
 			}
-			data = {};
 		}
+		error = true;
+	}
+
+	onMount(() => {
+		load();
+		refresh_metadata_handler.on('refresh_tv_view', load);
 	});
 
 	$inspect(tmdb_data);
@@ -82,6 +90,18 @@
 						</span>
 					</div>
 				{/each}
+			</div>
+		</div>
+	{/if}
+	{#if error}
+		<div>
+			<div class="mockup-code w-full">
+				<pre data-prefix="1"><code>An Internal Error Occured Looking Up Your Series</code></pre>
+				<pre data-prefix="2"><code class="bg-red-700 text-red-200">{JSON.stringify(data)}</code
+					></pre>
+				<pre data-prefix="3"></pre>
+				<pre data-prefix="4"><code>Please email the text in red to neosahadeo@protonmail.com</code
+					></pre>
 			</div>
 		</div>
 	{/if}
