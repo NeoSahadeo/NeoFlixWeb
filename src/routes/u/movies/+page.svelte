@@ -5,4 +5,4 @@
 	let { data }: PageProps = $props();
 </script>
 
-<TrendingPage {data} type="tv" />
+<TrendingPage {data} type="movie" />

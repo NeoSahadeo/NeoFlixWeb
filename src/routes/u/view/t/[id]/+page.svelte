@@ -3,7 +3,7 @@
 	import Hero from '$lib/components/view/hero.svelte';
 	import SeasonPoster from '$lib/components/view/seasonPoster.svelte';
 	import Request from '$lib/components/buttons/request.svelte';
-	import { fetch_series, fetch_tmdb_ref } from '$lib/scripts/sonarr_api';
+	import { fetch_data_tmdb, fetch_show } from '$lib/scripts/shared_api';
 	import { onMount } from 'svelte';
 	import { LocalStorageController } from '$lib/scripts/storage';
 	import { url_resolver } from '$lib/scripts/url_utils';
@@ -11,7 +11,7 @@
 
 	let { data }: any = $props();
 	let storage_controller = new LocalStorageController();
-	let tmdb_data = $state<any>(); // maybe reduce scope if not needed?
+	let tmdb_data = $state<any>();
 	let sonarr_database = $state<any>();
 	let sonarr_local = $state<any>();
 	let full_data = $derived({
@@ -24,14 +24,16 @@
 
 	async function load() {
 		sonarr_local = null;
-		const response = (await fetch_tmdb_ref(
+		const response = (await fetch_data_tmdb(
 			(data.data as any).id,
+			'sonarr',
 			storage_controller.get('sonarr_api_key')!
 		)) as any;
 		if (response) {
 			try {
-				const sonarr_array = await fetch_series(
+				const sonarr_array = await fetch_show(
 					response.tvdbId,
+					'sonarr',
 					storage_controller.get('sonarr_api_key')!
 				);
 				if (sonarr_array.length > 0) {
