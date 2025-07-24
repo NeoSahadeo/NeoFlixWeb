@@ -133,8 +133,14 @@ async function unsafe_start_search(id: number, api_key: string) {
 
 async function unsafe_fetch_series_id(id: string, api_key: string) {
 	// internal id
-	//http://localhost:8989/api/v3/episode?seriesId={ID}
-	// const response = await fetch()
+	const response = await fetch(
+		url_resolver('sonarr') + 'episode?seriesId=' + id,
+		GET_OPTIONS(api_key)
+	);
+	if (response.ok) {
+		return await response.json();
+	}
+	return null;
 }
 
 async function unsafe_fetch_series_queue_id(id: string, api_key: string) {
@@ -157,6 +163,7 @@ const delete_all_episodes = error_handler({ NAMESPACE, fn: unsafe_delete_all_epi
 const delete_season = error_handler({ NAMESPACE, fn: unsafe_delete_season });
 const start_search = error_handler({ NAMESPACE, fn: unsafe_start_search });
 const fetch_series_queue_id = error_handler({ NAMESPACE, fn: unsafe_fetch_series_queue_id });
+const fetch_series_id = error_handler({ NAMESPACE, fn: unsafe_fetch_series_id });
 
 export {
 	request_all_episodes,
@@ -166,5 +173,6 @@ export {
 	delete_all_episodes,
 	delete_episode,
 	delete_season,
-	fetch_series_queue_id
+	fetch_series_queue_id,
+	fetch_series_id
 };

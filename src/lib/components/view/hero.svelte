@@ -2,6 +2,7 @@
 	import DeleteId from '../buttons/deleteId.svelte';
 	import Request from '../buttons/request.svelte';
 	import Poster from './poster.svelte';
+	import ViewQueue from '$lib/components/buttons/viewQueue.svelte';
 
 	let { data } = $props();
 
@@ -59,6 +60,8 @@
 							label={'Delete All Downloaded Seasons'}
 						/>
 					{/if}
+					<!--Add check if the files are downloading or not-->
+					<ViewQueue id={data.sonarr_database.id} global_id={data.tmdb_data.id} type="tv" />
 				</div>
 			{:else}
 				<div>
