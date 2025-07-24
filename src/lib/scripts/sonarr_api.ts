@@ -120,12 +120,31 @@ async function unsafe_delete_season(id: string, season: number, api_key: string)
 }
 
 async function unsafe_start_search(id: number, api_key: string) {
+	// internal id
 	const response = await fetch(
 		url_resolver('sonarr') + 'command/',
 		POST_OPTIONS({ name: 'SeriesSearch', seriesId: id }, api_key)
 	);
 	if (response.ok) {
 		// notify?
+	}
+	return null;
+}
+
+async function unsafe_fetch_series_id(id: string, api_key: string) {
+	// internal id
+	//http://localhost:8989/api/v3/episode?seriesId={ID}
+	// const response = await fetch()
+}
+
+async function unsafe_fetch_series_queue_id(id: string, api_key: string) {
+	// internal id
+	const response = await fetch(
+		url_resolver('sonarr') + 'queue/details?seriesId=' + id,
+		GET_OPTIONS(api_key)
+	);
+	if (response.ok) {
+		return await response.json();
 	}
 	return null;
 }
@@ -137,6 +156,7 @@ const request_season = error_handler({ NAMESPACE, fn: unsafe_request_season });
 const delete_all_episodes = error_handler({ NAMESPACE, fn: unsafe_delete_all_episodes });
 const delete_season = error_handler({ NAMESPACE, fn: unsafe_delete_season });
 const start_search = error_handler({ NAMESPACE, fn: unsafe_start_search });
+const fetch_series_queue_id = error_handler({ NAMESPACE, fn: unsafe_fetch_series_queue_id });
 
 export {
 	request_all_episodes,
@@ -145,5 +165,6 @@ export {
 	request_season,
 	delete_all_episodes,
 	delete_episode,
-	delete_season
+	delete_season,
+	fetch_series_queue_id
 };

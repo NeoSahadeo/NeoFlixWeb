@@ -121,10 +121,23 @@ async function unsafe_fetch_show(id: string, type: 'sonarr' | 'radarr', api_key:
 	return null;
 }
 
+async function unsafe_fetch_show_id(id: string, type: 'sonarr' | 'radarr', api_key: string) {
+	//internal id
+	const response = await fetch(
+		url_resolver(type) + get_search_base(type) + '/' + id,
+		GET_OPTIONS(api_key)
+	);
+	if (response.ok) {
+		return await response.json();
+	}
+	return null;
+}
+
 const get_media_folder = error_handler({ fn: unsafe_get_media_folder });
 const fetch_data_tvdb = error_handler({ fn: unsafe_fetch_data_tvdb });
 const fetch_data_tmdb = error_handler({ fn: unsafe_fetch_data_tmdb });
 const fetch_show = error_handler({ fn: unsafe_fetch_show });
+const fetch_show_id = error_handler({ fn: unsafe_fetch_show_id });
 
 export {
 	DELETE_OPTIONS, //
@@ -135,5 +148,6 @@ export {
 	fetch_data_tvdb,
 	fetch_data_tmdb,
 	fetch_show,
+	fetch_show_id,
 	error_handler
 };

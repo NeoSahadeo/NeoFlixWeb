@@ -8,12 +8,12 @@
 	const base_path = url_resolver('self');
 
 	const links: Record<string, string> = {
-		Home: base_path + 'u/home',
+		Dashboard: base_path + 'u/dashboard',
+		// Home: base_path + 'u/home',
 		'TV Shows': base_path + 'u/tvshows',
 		Movies: base_path + 'u/movies',
 		// Watchlist: 'u/watchlist',
 		Downloaded: base_path + 'u/downloaded'
-		// Dashboard: base_path + 'u/dashboard'
 	};
 </script>
 
