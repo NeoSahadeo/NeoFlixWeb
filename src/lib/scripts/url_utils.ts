@@ -5,7 +5,7 @@ enum API_URI {
 	SELF_PROD = '',
 	SONARR_DEV = 'http://localhost:8989/api/v3/',
 	SONARR_PROD = '',
-	RADARR_DEV = '',
+	RADARR_DEV = 'http://localhost:7878/api/v3/',
 	RADARR_PROD = '',
 	PROWLARR_DEV = '',
 	PROWLARR_PROD = '',

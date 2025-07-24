@@ -96,9 +96,7 @@ async function unsafe_delete_all_episodes(id: string, api_key: string) {
 			DELETE_OPTIONS(api_key)
 		);
 		if (r.ok) {
-			setTimeout(() => {
-				refresh_metadata_handler.dispatch('refresh_tv_view');
-			}, 1000);
+			refresh_metadata_handler.dispatch('refresh_tv_view');
 		}
 	}
 	return null;

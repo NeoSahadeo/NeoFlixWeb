@@ -5,6 +5,7 @@
 		request_missing_episodes,
 		request_season
 	} from '$lib/scripts/sonarr_api';
+	import { request_movie } from '$lib/scripts/radarr_api';
 	import { LocalStorageController } from '$lib/scripts/storage';
 
 	let {
@@ -18,7 +19,7 @@
 		id: string;
 		label?: string;
 		_class?: string;
-		season: number | 'all' | 'missing';
+		season?: number | 'all' | 'missing';
 	} = $props();
 
 	async function handle_tv_request() {
@@ -32,12 +33,16 @@
 				await request_missing_episodes(id, api_key);
 				break;
 			default:
-				await request_season(id, season, api_key);
+				await request_season(id, season!, api_key);
 				break;
 		}
 	}
 
-	async function handle_movie_request() {}
+	async function handle_movie_request() {
+		const storage_controller = new LocalStorageController();
+		const api_key = storage_controller.get('radarr_api_key')!;
+		request_movie(id, api_key);
+	}
 
 	function handle_request() {
 		if (type === 'tv') {

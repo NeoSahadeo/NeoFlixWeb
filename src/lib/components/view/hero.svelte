@@ -5,24 +5,34 @@
 
 	let { data } = $props();
 
-	let total_seasons = $derived(data.sonarr_database.seasons.length);
+	let total_seasons = $derived(data.sonarr_database?.seasons.length);
 	let tracked_seasons = $derived(
 		data.sonarr_local?.seasons.reduce(
 			(accumulator: any, current_value: any) => accumulator + (current_value.monitored ? 1 : 0),
 			0
 		)
 	);
-
-	$inspect(data.sonarr_database.tvdbId);
-	$inspect(tracked_seasons);
+	if (data.type === 'tv') {
+		$inspect(data.sonarr_database?.tvdbId);
+		$inspect(tracked_seasons);
+	}
+	if (data.type === 'movie') {
+		$inspect(data.radarr_local);
+	}
 </script>
 
 <div class="flex flex-row">
 	<div>
-		<Poster alt={data.tmdb_data.name} src={data.tmdb_data.poster_path} />
+		<Poster
+			alt={data.tmdb_data.name}
+			src={data.type === 'tv' ? data.tmdb_data.poster_path : data.tmdb_data.remotePoster}
+			src_override={data.type === 'tv' ? false : true}
+		/>
 		<span class="text-xl font-bold text-white">
-			{data.tmdb_data.name}
-			<span class="italic">({data.tmdb_data.first_air_date})</span>
+			{data.type === 'tv' ? data.tmdb_data.name : data.tmdb_data.title}
+			<span class="italic"
+				>({data.type === 'tv' ? data.tmdb_data.first_air_date : data.tmdb_data.year})</span
+			>
 		</span>
 	</div>
 	<div class="px-3">
@@ -51,7 +61,13 @@
 					{/if}
 				</div>
 			{:else}
-				<div></div>
+				<div>
+					{#if data.radarr_local}
+						<DeleteId type="movie" id={data.tmdb_data.tmdbId} />
+					{:else}
+						<Request type="movie" id={data.tmdb_data.tmdbId} />
+					{/if}
+				</div>
 			{/if}
 		</span>
 	</div>

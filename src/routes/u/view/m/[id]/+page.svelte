@@ -1,28 +1,41 @@
 <script lang="ts">
-	import DeleteId from '$lib/components/buttons/deleteId.svelte';
 	import Hero from '$lib/components/view/hero.svelte';
-	import Request from '$lib/components/buttons/request.svelte';
-	import { fetch_series, fetch_tmdb_ref } from '$lib/scripts/sonarr_api';
 	import { onMount } from 'svelte';
 	import { LocalStorageController } from '$lib/scripts/storage';
-	import { url_resolver } from '$lib/scripts/url_utils';
 	import { refresh_metadata_handler } from '$lib/events/default';
+	import { fetch_data_tmdb, fetch_show } from '$lib/scripts/shared_api';
 
 	let { data }: any = $props();
 	let storage_controller = new LocalStorageController();
 	let tmdb_data = $state<any>();
-	let sonarr_database = $state<any>();
-	let sonarr_local = $state<any>();
+	let radarr_local = $state<any>();
 	let full_data = $derived({
-		type: 'tv',
-		radarr_database: sonarr_database, // default radarr stats from tvdb etc
-		radarr_local: sonarr_local, // actual data for the show on radarr server
-		tmdb_data: tmdb_data
+		type: 'movie',
+		tmdb_data: tmdb_data,
+		radarr_local: radarr_local
 	});
 	let error = $state(false);
 
 	async function load() {
+		radarr_local = null;
 		try {
+			const response = (await fetch_data_tmdb(
+				(data.data as any).id,
+				'radarr',
+				storage_controller.get('radarr_api_key')!
+			)) as any;
+			if (response) {
+				const r = await fetch_show(
+					response.tmdbId,
+					'radarr',
+					storage_controller.get('radarr_api_key')!
+				);
+				if (r.length > 0) {
+					radarr_local = r[0];
+				}
+				tmdb_data = response;
+				return;
+			}
 		} catch (err) {
 			console.error(err);
 		}
@@ -33,6 +46,8 @@
 		load();
 		refresh_metadata_handler.on('refresh_movie_view', load);
 	});
+
+	$inspect(tmdb_data);
 </script>
 
 <main class="px-4 pt-20 pb-20">

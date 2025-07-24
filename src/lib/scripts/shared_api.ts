@@ -1,4 +1,3 @@
-import { SvelteURLSearchParams } from 'svelte/reactivity';
 import { url_resolver } from './url_utils';
 
 function shared_error(NAMESPACE: string, err: any) {
@@ -113,10 +112,9 @@ async function unsafe_fetch_data_tmdb(
 
 async function unsafe_fetch_show(id: string, type: 'sonarr' | 'radarr', api_key: string) {
 	const response = await fetch(
-		url_resolver(type) + get_search_base(type) + '?tvdbId=' + id,
+		url_resolver(type) + get_search_base(type) + (type === 'sonarr' ? '?tvdbId=' : '?tmdbId=') + id,
 		GET_OPTIONS(api_key)
 	);
-
 	if (response.ok) {
 		return await response.json();
 	}

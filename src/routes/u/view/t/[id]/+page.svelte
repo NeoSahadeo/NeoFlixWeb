@@ -24,13 +24,13 @@
 
 	async function load() {
 		sonarr_local = null;
-		const response = (await fetch_data_tmdb(
-			(data.data as any).id,
-			'sonarr',
-			storage_controller.get('sonarr_api_key')!
-		)) as any;
-		if (response) {
-			try {
+		try {
+			const response = (await fetch_data_tmdb(
+				(data.data as any).id,
+				'sonarr',
+				storage_controller.get('sonarr_api_key')!
+			)) as any;
+			if (response) {
 				const sonarr_array = await fetch_show(
 					response.tvdbId,
 					'sonarr',
@@ -48,9 +48,9 @@
 					tmdb_data = await r.json();
 				}
 				return;
-			} catch (err) {
-				console.error(err);
 			}
+		} catch (err) {
+			console.error(err);
 		}
 		error = true;
 	}
