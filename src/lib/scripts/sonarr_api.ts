@@ -112,8 +112,8 @@ async function unsafe_delete_season(id: string, season: number, api_key: string)
 		if (r.ok) {
 			const current_data = await fetch_show(json.tvdbId, 'sonarr', api_key);
 			if (current_data.length > 0) {
-				current_data[0].seasons.filter((e: any) => e.monitored).length == 0;
-				await delete_all_episodes(id, api_key);
+				if (current_data[0].seasons.filter((e: any) => e.monitored).length == 0)
+					await delete_all_episodes(id, api_key);
 			}
 			refresh_metadata_handler.dispatch('refresh_tv_view');
 		}
